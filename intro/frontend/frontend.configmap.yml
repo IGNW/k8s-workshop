@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp
+data:
+  dependency.url: 'https://foo.bar/api/v2/'
+  dependency.secured: true

@@ -1,0 +1,70 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: gcr.io/k8s-workshop-249203/frontend:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /healthz
+              port: 5000
+              scheme: HTTP
+          ports:
+          - containerPort: 5000
+            name: http
+          env:
+            - name: REDIS_HOST
+              value: 'redis-primary'
+            - name: REDIS_PORT
+              value: '6379'
+            # - name: CHAOS
+            #   value: true
+            - name: SECRET_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: frontend
+                  key: secret_env
+            - name: DEPENDENCY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend
+                  key: dependency.url
+            - name: DEPENDENCY_SECURED
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend
+                  key: dependency.secured
+          resources:
+            limits:
+              cpu: 200m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 300Mi
+      volumes:
+        - name: secrets
+          secret:
+            secretName: frontend
+            items:
+            - key: secret_file
+              path: secret_file
+              mode: 511
