@@ -33,7 +33,7 @@ spec:
             name: http
           env:
             - name: REDIS_HOST
-              value: 'redis-primary'
+              value: 'redis'
             - name: REDIS_PORT
               value: '6379'
             # - name: CHAOS

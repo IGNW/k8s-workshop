@@ -3,6 +3,11 @@
 ## Overview
 This lab will walk you through deploying an application to your Kubernetes cluster using the kubectl command line and pre-made Kubernetes manifests. We intentionally do a broken deployment, we'll be fixing that as part of the lab.
 
+Pre-reqs:
+- A working k8s cluster
+- Clone the repo `git clone https://github.com/IGNW/k8s-workshop.git`
+- `cd` to the `intro` directory in the repo: `cd intro`
+
 ### Deploy Redis Key/Value Store
 Steps:
 - Deploy a dedicated Namespace for Redis and our frontend application
@@ -39,12 +44,10 @@ Steps:
 - Verify we have fixed out application
 
 1. Deploy the frontend application
-    * `kubectl apply -f frontend/frontend.deployment.yml`
-      This creates the deployment object for our application
+    * `kubectl apply -f frontend/`
+      This creates the deployment and service objects for our application
     * `kubectl get pods`
       Lists all pods for our newly created deployment
-    * `kubectl apply -f frontend/frontend.service.yml`
-      Apply the service definition to tell Kubernetes to expose our application via a LoadBalancer
     * `kubectl get services`
       Inspect the newly created load balancer
     
@@ -61,8 +64,8 @@ Steps:
     * `kubectl apply -f frontend/frontend.deployment.yml --namespace k8s-workshop`
       `kubectl apply -f frontend/frontend.service.yml --namespace k8s-workshop`
       This will delete and re-apply our frontend application into the correct `k8s-workshop` namespace
-    * `kubectl get services --namespace k8s-workshop`
-      This will list the new service endpoint we just created, the IP will have changed.
+    * `watch kubectl get services --namespace k8s-workshop`
+      This will list the new service endpoint we just created, we'll wait for the new IP to show up so we can test
 1. Test
     * `curl [external_ip]/foo/bar`
       You can now see the service is functioning as expected
@@ -71,17 +74,23 @@ Steps:
 
 ### Scaling the aplication
 1. Scale the Deployment
-    * `kubectl --namespace k8s-workshop scale deployment frontend --replicas=2
+    * `kubectl --namespace k8s-workshop scale deployment frontend --replicas=2`
       This will tell Kubernetes to increase the number of copies of `frontend` to 2
     * `kubectl --namespace k8s-workshop get pods`
       List the currently deployed pods, notice how there are now 4 copies of `frontend`
+    * `curl [external_ip]`
+      Do this several times in a row, see how the pod name changes?
 
-1. Create the Horizontal Pod Autoscaler to automate the process
-    * `kubectl apply -f fronend/frontend.hpa.yml --namespace k8s-workshop`
-      Create the HPA from the yml file in the frontend directory
+1. Use a Horizontal Pod Autoscaler to automate the process
+    * `kubectl get hpa --namespace k8s-workshop`
+      Inspect the HPA we created earlier
     * Install `ab`: `sudo apt-get install apache2-utils --yes`
     * Apply some load `ab -n 30000 -c 100 http://[external_ip]:[port]/load`
     * `kubectl get hpa --namespace k8s-workshop`
-      Show the status of the HPA we just created
+      Show the status of the HPA we just triggered
     * `kubectl get pods --namespace k8s-workshop`
       Show the increased number of pods in the cluster
+    * Wait for the `ab` run to finish
+    * `kubectl get hpa,pods --namespace k8s-workshop`
+      Inspect the HPA and pods to see that the HPA has scaled back down, this may take a few minutes as we have to wait for the HPA cooldown timer to expire
+
