@@ -61,8 +61,7 @@ Steps:
 
 1. Fix the broken deployment
     * `kubectl delete -f frontend/`
-    * `kubectl apply -f frontend/frontend.deployment.yml --namespace k8s-workshop`
-      `kubectl apply -f frontend/frontend.service.yml --namespace k8s-workshop`
+    * `kubectl apply -f frontend/ --namespace k8s-workshop`
       This will delete and re-apply our frontend application into the correct `k8s-workshop` namespace
     * `watch kubectl get services --namespace k8s-workshop`
       This will list the new service endpoint we just created, we'll wait for the new IP to show up so we can test
