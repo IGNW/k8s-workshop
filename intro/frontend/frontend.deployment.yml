@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: gcr.io/k8s-workshop-249203/frontend:latest
+          image: gcr.io/llbean-workshop/frontend@sha256:8681c5526ed0c82d7d2a280c2e41c8b0d66eb99e07e8a39d3edcd9b6207ff9f8
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
